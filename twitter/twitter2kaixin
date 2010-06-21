@@ -5,6 +5,7 @@ use URI;
 use Net::Twitter;
 use WWW::Mechanize;
 use Web::Scraper;
+use HTML::Entities;
 binmode STDERR, ":utf8";
 
 my $username = ''; # twitter username
@@ -44,6 +45,7 @@ sub last_record {
     my $record = scraper { process "div.list", "list[]" => 'HTML'; };
     my $res = $record->scrape( URI->new("http://wap.kaixin001.com/record/list.php?uid=$uid&verify=$verify") );
     my ( $last ) = ( $res->{'list'}[0] =~ q{<br />(.*?)<br /><a href} );
+    $last = decode_entities( $last );
     printf STDERR "last record: %s\n", $last;
     return $last;
 }
