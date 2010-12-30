@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+use kaixin;
+
+my $who = shift || 'c';
+my $account = {
+	'c' => { email => 'chunzi@gmail.com', pass => 'cl78166' },
+	'm' => { email => 'minniezw@yahoo.com.cn', pass => 'minnie' },
+};
+
+my $k = kaixin->new;
+$k->email($account->{$who}{'email'});
+$k->password($account->{$who}{'pass'});
+
+$k->login;
+$k->ready_park;
+$k->show_my_parking;
+$k->show_my_cars;
+if ( scalar @{$k->cars_need_move} ){
+	$k->where_can_park;
+	$k->park;
+	$k->ready_park;
+	$k->show_my_cars;
+}
+
+
