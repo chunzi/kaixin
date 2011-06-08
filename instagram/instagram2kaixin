@@ -12,10 +12,12 @@ use WWW::Mechanize;
 our $verify = '';
 our $albumid = 0;
 our $watch = '';
+our $dry = 0;
 GetOptions (
-    "watch=s" => \$watch,
-    "verify=s" => \$verify,
-    "albumid=i" => \$albumid,
+    "watch=s"     => \$watch,
+      "verify=s"  => \$verify,
+      "albumid=i" => \$albumid,
+      "dry"     => \$dry,
 );
 
 my $home = File::HomeDir->my_home;
@@ -24,7 +26,7 @@ my $conf = {};
 $conf = LoadFile("$conf_file") if -f $conf_file;
 
 
-my @photos = sort grep { /\.jpg$/ } grep { -f } dir( $watch )->children;
+my @photos = sort { $a->basename <=> $b->basename } grep { /\.jpg$/ } grep { -f } dir( $watch )->children;
 for my $path ( @photos ){
     my $basename = $path->basename;
     $basename =~ s/\.jpg$//;
@@ -40,8 +42,8 @@ DumpFile("$conf_file", $conf);
 sub upload {
     my $path = shift;
     my $title = shift || 'Untitled';
-    printf STDERR "Uploading %s ...\n";
-    return;
+    printf STDERR "Uploading %s ...\n", $path;
+    return if $dry;
 
     # show me the upload page
     my $uri = URI->new('http://wap.kaixin001.com/photo/upload.php?verify='.$verify); 
