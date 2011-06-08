@@ -1,0 +1,58 @@
+#!/usr/bin/env perl
+use strict;
+
+use Encode;
+use File::HomeDir;
+use Getopt::Long;
+use Path::Class;
+use URI;
+use YAML::Syck;
+use WWW::Mechanize;
+
+our $verify = '';
+our $albumid = 0;
+our $watch = '';
+GetOptions (
+    "watch=s" => \$watch,
+    "verify=s" => \$verify,
+    "albumid=i" => \$albumid,
+);
+
+my $home = File::HomeDir->my_home;
+my $conf_file = file( $home, '.instagram2kaixin.yaml');
+my $conf = {};
+$conf = LoadFile("$conf_file") if -f $conf_file;
+
+
+my @photos = sort grep { /\.jpg$/ } grep { -f } dir( $watch )->children;
+for my $path ( @photos ){
+    my $basename = $path->basename;
+    $basename =~ s/\.jpg$//;
+    my ( $pid, $date, $title ) = split( /\s+-\s+/, $basename, 3 );
+    next if $conf->{$verify}{$pid};
+
+    upload( "$path", $title );
+    $conf->{$verify}{$pid} = 1;
+}
+DumpFile("$conf_file", $conf);
+
+
+sub upload {
+    my $path = shift;
+    my $title = shift || 'Untitled';
+    printf STDERR "Uploading %s ...\n";
+    return;
+
+    # show me the upload page
+    my $uri = URI->new('http://wap.kaixin001.com/photo/upload.php?verify='.$verify); 
+    my $mech = WWW::Mechanize->new;
+    $mech->get( $uri );
+
+    # upload 
+    my $form = $mech->form_number(1);
+    $mech->field('title',decode_utf8($title));
+    $mech->field('title', $title);
+    $mech->field('albumid', $albumid);
+    $mech->submit;
+}
+
