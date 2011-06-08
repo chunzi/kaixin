@@ -25,14 +25,20 @@ my $conf_file = file( $home, '.instagram2kaixin.yaml');
 my $conf = {};
 $conf = LoadFile("$conf_file") if -f $conf_file;
 
-
-my @photos = sort { $a->basename <=> $b->basename } grep { /\.jpg$/ } grep { -f } dir( $watch )->children;
+# find out which photos need upload
+my @pending = ();
+my @photos = grep { /\.jpg$/ } grep { -f } dir( $watch )->children;
 for my $path ( @photos ){
     my $basename = $path->basename;
     $basename =~ s/\.jpg$//;
     my ( $pid, $date, $title ) = split( /\s+-\s+/, $basename, 3 );
     next if $conf->{$verify}{$pid};
+    push @pending, [ $pid, $path->stringify, $title ];
+}
 
+# sort and upload one by one
+for ( sort { $a->[0] <=> $b->[0] } @pending ){
+    my ( $pid, $path, $title ) = @$_;
     upload( "$path", $title );
     $conf->{$verify}{$pid} = 1;
 }
