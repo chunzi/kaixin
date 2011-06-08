@@ -14,10 +14,10 @@ our $albumid = 0;
 our $watch = '';
 our $dry = 0;
 GetOptions (
-    "watch=s"     => \$watch,
-      "verify=s"  => \$verify,
-      "albumid=i" => \$albumid,
-      "dry"     => \$dry,
+  "watch=s"   => \$watch,
+  "verify=s"  => \$verify,
+  "albumid=i" => \$albumid,
+  "dry"       => \$dry,
 );
 
 my $home = File::HomeDir->my_home;
@@ -58,8 +58,8 @@ sub upload {
 
     # upload 
     my $form = $mech->form_number(1);
+    $mech->field('file', $path);
     $mech->field('title',decode_utf8($title));
-    $mech->field('title', $title);
     $mech->field('albumid', $albumid);
     $mech->submit;
 }
