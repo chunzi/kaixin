@@ -41,8 +41,8 @@ for ( sort { $a->[0] <=> $b->[0] } @pending ){
     my ( $pid, $path, $title ) = @$_;
     upload( "$path", $title );
     $conf->{$verify}{$pid} = 1;
+    DumpFile("$conf_file", $conf);
 }
-DumpFile("$conf_file", $conf);
 
 
 sub upload {
